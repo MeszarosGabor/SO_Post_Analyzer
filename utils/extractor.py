@@ -398,17 +398,28 @@ def generate_imports_collection(
 ) -> typing.Dict[str, int]:
     stats = collections.defaultdict(int)
 
-    with open(output_path, "w") as out_handle: 
-        with open(input_path) as in_handle:
-            for row in tqdm.tqdm(in_handle):
-                try:
-                    parsed_row = json.loads(row)
-                    post_id, data = extract_code_snippets_from_parsed_row(parsed_row)
-                    post_id, import_list = extract_import_statements_from_single_row(
-                        post_id, parsed_data=data)
-                    out_handle.write(json.dumps({post_id: import_list}))
-                    out_handle.write("\n")
-                    stats['success'] += 1
-                except Exception as exc:
-                    stats[str(exc)] += 1
+    with open(f"{output_path}_imports_and_dates", "w") as out_handle:
+            with open(output_path, "w") as out_handle:
+                with open(input_path) as in_handle:
+                    for row in tqdm.tqdm(in_handle):
+                        try:
+                            parsed_row = json.loads(row)
+                            post_id, data = extract_code_snippets_from_parsed_row(parsed_row)
+                            post_id, import_list = extract_import_statements_from_single_row(
+                                post_id, parsed_data=data)
+                            if not import_list:
+                                stats['empty list'] += 1
+                                continue
+                            # Persist libs
+                            payload = {
+                                "id": post_id,
+                                "imports": import_list,
+                                "date": data.get("date_posted"),
+                            }
+                            out_handle.write(json.dumps(payload))
+                            out_handle.write("\n")
+
+                            stats['success'] += 1
+                        except Exception as exc:
+                            stats[str(exc)] += 1
     return stats

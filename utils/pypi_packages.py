@@ -5,6 +5,7 @@ import requests
 
 PYPI_PACKAGES = None
 
+
 def get_pypi_package_names():
     global PYPI_PACKAGES
     if not PYPI_PACKAGES:
