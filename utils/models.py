@@ -25,3 +25,20 @@ class CodeBlock(PostBlock):
 
 class TextBlock(PostBlock):
     pass
+
+
+# TABLE HEADERS
+POSTS_COLS = [
+    "PostTypeId",
+    "AcceptedAnswerId",
+    "CreationDate",
+    "Score",
+    "ViewCount",
+    "Body",
+    "OwnerUserId",
+    "LastActivityDate",
+    "Tags",
+    "CommentCount",
+    "AnswerCount",
+    "ParentId",
+]

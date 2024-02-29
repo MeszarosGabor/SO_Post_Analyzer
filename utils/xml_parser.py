@@ -5,24 +5,12 @@ import typing
 
 import lxml.etree
 
+import utils.models as models
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-POSTS_COLS = [
-    "PostTypeId",
-    "AcceptedAnswerId",
-    "CreationDate",
-    "Score",
-    "ViewCount",
-    "Body",
-    "OwnerUserId",
-    "LastActivityDate",
-    "Tags",
-    "CommentCount",
-    "AnswerCount",
-    "ParentId",
-]
 
 
 def fast_iter(context, func, *args, **kwargs):
@@ -67,7 +55,7 @@ def get_row_data_json(
         if "python" in tags:
             post_dict = {}
             post_dict[row.attrib.get("Id", "")] = [
-                row.attrib.get(x, "") for x in POSTS_COLS
+                row.attrib.get(x, "") for x in models.POSTS_COLS
             ]
             json.dump(post_dict, outfile)
             outfile.write("\n")
