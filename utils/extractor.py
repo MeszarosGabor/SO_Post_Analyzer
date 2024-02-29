@@ -1,11 +1,15 @@
 # flake8: noqa
+import collections
+import json
 import logging
 import re
-import tqdm
 import typing
 
-import models
-import regex_patterns
+import tqdm
+
+import utils.pypi_packages as pypi_packages 
+import utils.models as models
+import utils.regex_patterns as regex_patterns
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -333,12 +337,11 @@ def extract_text_blocks(text, post_id: str):
     return post_blocks
 
 
-def extract_code_snippets(parsed_data: typing.List):
-    snippet_collector = {}
-    logger.info("Started extracting code snippets")
-    for post in tqdm.tqdm(parsed_data):
-        for post_id, data in post.items():
-            snippet_collector[post_id] = {
+def extract_code_snippets_from_parsed_row(parsed_row: typing.Dict) -> None:
+        post_id, data = list(parsed_row.items())[0]
+        return (
+            post_id,
+            {
                 "post_type": data[0],
                 "accepted_answer_id": data[1],
                 "date_posted": data[2],
@@ -359,13 +362,10 @@ def extract_code_snippets(parsed_data: typing.List):
                 "n_answers": data[10],
                 "parent_id": data[11],
             }
-
-    logger.info("Finished extracting code snippets")
-
-    return snippet_collector
+        )
 
 
-def extract_import_statements(code):
+def extract_import_statements_from_code(code):
     import_statements = set()
 
     for statement in regex_patterns.import_pattern.findall(code):
@@ -378,22 +378,37 @@ def extract_import_statements(code):
     return list(import_statements)
 
 
-def collect_all_import_statements(code_snippets: typing.Dict) -> typing.Dict:
-    logger.info("Started extracting import statements")
-    imports_dict = {}
+def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
+    libs = []
+    for cs in parsed_data["code_snippets"]:
+        cs2 = cs.replace("\n", " ")
+        try:
+            libs += extract_import_statements_from_code(cs2)
+        except Exception as exc:
+            print(f"Exception at code extraction with cs:{cs}, cs2: {cs2}, exc: {exc}")
+    
+    pypi_package_names = pypi_packages.get_pypi_package_names()
+    
+    return post_id, list(set(libs) & pypi_package_names)
 
-    for snippet in tqdm.tqdm(code_snippets):
-        libs = []
-        for cs in code_snippets[snippet]["code_snippets"]:
-            cs2 = cs.replace("\n", " ")
-            try:
-                libs += extract_import_statements(cs2)
-            except Exception as exc:
-                print(f"Exception at code extraction with {cs}")
-        if not libs:
-            # do not take up space in case there are no imports found
-            continue
-        imports_dict[snippet] = list(set(libs))
-    logger.info("Finished extracting import statements")
 
-    return imports_dict
+def generate_imports_collection(
+        input_path: str,
+        output_path: str,
+) -> typing.Dict[str, int]:
+    stats = collections.defaultdict(int)
+
+    with open(output_path, "w") as out_handle: 
+        with open(input_path) as in_handle:
+            for row in tqdm.tqdm(in_handle):
+                try:
+                    parsed_row = json.loads(row)
+                    post_id, data = extract_code_snippets_from_parsed_row(parsed_row)
+                    post_id, import_list = extract_import_statements_from_single_row(
+                        post_id, parsed_data=data)
+                    out_handle.write(json.dumps({post_id: import_list}))
+                    out_handle.write("\n")
+                    stats['success'] += 1
+                except Exception as exc:
+                    stats[str(exc)] += 1
+    return stats
