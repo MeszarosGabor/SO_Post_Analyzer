@@ -7,7 +7,7 @@ import typing
 
 import tqdm
 
-import utils.pypi_packages as pypi_packages 
+import utils.valid_python_packages as valid_python_packages 
 import utils.models as models
 import utils.regex_patterns as regex_patterns
 
@@ -381,14 +381,15 @@ def extract_import_statements_from_code(code: str) -> typing.List[str]:
 def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
     libs = []
     for cs in parsed_data["code_snippets"]:
-        # cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
+        cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
         try:
             libs += extract_import_statements_from_code(cs)
         except Exception as exc:
             print(f"Exception at code extraction with cs:{cs}, exc: {exc}")
-    pypi_package_names = pypi_packages.get_pypi_package_names()
 
-    return post_id, parsed_data["code_snippets"], sorted(list(set(libs) & pypi_package_names))
+    valid_package_names = valid_python_packages.get_all_package_names()
+
+    return post_id, parsed_data["code_snippets"], sorted(list(set(libs) & valid_package_names))
 
 
 def generate_imports_collection(

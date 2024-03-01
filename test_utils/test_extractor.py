@@ -46,15 +46,28 @@ def test_extract_import_statements_from_code(snippet, expected_imports):
             },
             ['BeautifulSoup', 'urllib2'],
             id="Multiline multiple imports"
+        ),
+        pytest.param(
+            {
+                "code_snippets":  [
+                    'import urllib2\nfrom BeautifulSoup import BeautifulSoup\nsoup = BeautifulSoup(urllib2.urlopen("https://www.google.com"))\nprint soup.title.string',
+                    'from lxml import etree\nfrom StringIO import StringIO\netree.parse(StringIO(html), etree.HTMLParser(recover=False))',
+                ],
+            },
+            ['BeautifulSoup', 'StringIO', 'lxml', 'urllib2'],
+            id="Multiple snippets, multiple multiline imports"
         )
     ],
 )
 def test_extract_import_statements_from_single_row(parsed_row, expected_imports):
     with patch(
-        "utils.pypi_packages.get_pypi_package_names",
-        # TODO: This function currently does not return built-in libs,
-        # make sure you do no hide this bug in testing!!!
-        return_value={'BeautifulSoup'}
+        "utils.valid_python_packages.get_all_package_names",
+        return_value={
+            'urllib2',
+            'BeautifulSoup',
+            'lxml',
+            'StringIO',
+            }
     ):
         _, _, import_list = extractor.extract_import_statements_from_single_row(
             post_id="123",
