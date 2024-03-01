@@ -5,13 +5,54 @@ Utility functions and analyzer tools around StackOverflow Post dumps.
 # SETUP
 ## Extract the xml source (not included)
 
+## Set Pythonpath to directory root
+Run from the directory root:
+```
+export PYTHONPATH=$PYTHONPATH:.
+```
+
 ## Install Dependencies
 
 ```
 $pip install -r requirements.txt
 ```
 
-## Run the main xml parser, generate the JSON output, and parse it to obtain the code snippets.
+## Generate Import Collection
+
+You may start with the parsing of the raw xml file and generate a python files metadata json file.
 ```
- python main.py -i test_xmls/SmallPost.xml -o test_out.json
+ python main.py -i test_xmls/SmallPost.xml -m metadata.jsonl -o out.jsonl
+```
+
+In case you already have a JSON file generated, you may opt out of the first step.
+
+```
+ python main.py -j python_posts.jsonl /SmallPost.xml -m metadata.json -o out.jsonl
+```
+
+The output file will be a jsonl file, with the following JSON content on every line:
+```
+{
+    "id": "802",
+    "imports": ["MySQLdb"],
+    "date": "2008-08-03T20:07:05.290",
+    "codes": <list of code snippets>}
+```
+
+## Generate First Appearances
+
+Once the import collection is generated, the first appearances script collects the timestamps the individual libraries as well as pairs of libraries were imported the first time. Output format:
+
+Individual:
+```
+{
+    "MySQLdb": "2008-08-03",
+}
+```
+
+Pairs:
+```
+{
+    "parameterized|unittest": "2008-08-28",
+}
 ```

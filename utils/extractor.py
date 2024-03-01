@@ -389,7 +389,7 @@ def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing
     
     pypi_package_names = pypi_packages.get_pypi_package_names()
     
-    return post_id, list(set(libs) & pypi_package_names)
+    return post_id, parsed_data["code_snippets"], list(set(libs) & pypi_package_names)
 
 
 def generate_imports_collection(
@@ -405,7 +405,7 @@ def generate_imports_collection(
                         try:
                             parsed_row = json.loads(row)
                             post_id, data = extract_code_snippets_from_parsed_row(parsed_row)
-                            post_id, import_list = extract_import_statements_from_single_row(
+                            post_id, codes, import_list = extract_import_statements_from_single_row(
                                 post_id, parsed_data=data)
                             if not import_list:
                                 stats['empty list'] += 1
@@ -414,6 +414,7 @@ def generate_imports_collection(
                             payload = {
                                 "id": post_id,
                                 "imports": import_list,
+                                "codes": codes,
                                 "date": data.get("date_posted"),
                             }
                             out_handle.write(json.dumps(payload))

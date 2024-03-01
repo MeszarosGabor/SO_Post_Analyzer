@@ -25,6 +25,7 @@ def find_first_appearances(data_path: str):
                 ):
                     individual_dates[package] = dt
 
+            # create or update entry for pair timestamp
             for p1, p2 in itertools.combinations(data.get("imports"), 2):
                 canonical_pair_name = "|".join(sorted([p1, p2]))
                 if (
@@ -40,10 +41,14 @@ def find_first_appearances(data_path: str):
 @click.option("-i", "--input_path", type=str)
 @click.option("-o", "--output_path", type=str)
 def main(input_path, output_path):
+    if output_path.endswith(".json"):
+        output_path = output_path[:5]
+
     individual_dates, pair_dates = find_first_appearances(input_path)
-    with open(f"{output_path}_indiv", 'w') as handle:
+
+    with open(f"{output_path}_indiv.json", 'w') as handle:
         json.dump(individual_dates, handle, default=str)
-    with open(f"{output_path}_pairs", 'w') as handle:
+    with open(f"{output_path}_pairs.json", 'w') as handle:
         json.dump(pair_dates, handle, default=str)
 
 
