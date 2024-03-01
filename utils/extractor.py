@@ -365,7 +365,7 @@ def extract_code_snippets_from_parsed_row(parsed_row: typing.Dict) -> None:
         )
 
 
-def extract_import_statements_from_code(code):
+def extract_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
 
     for statement in regex_patterns.import_pattern.findall(code):
@@ -375,21 +375,20 @@ def extract_import_statements_from_code(code):
         elif len(words) > 1 and words[0] == "from":
             import_statements.add(words[1].split(".")[0].rstrip(","))
 
-    return list(import_statements)
+    return sorted(list(import_statements))
 
 
 def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
     libs = []
     for cs in parsed_data["code_snippets"]:
-        cs2 = cs.replace("\n", " ")
+        # cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
         try:
-            libs += extract_import_statements_from_code(cs2)
+            libs += extract_import_statements_from_code(cs)
         except Exception as exc:
-            print(f"Exception at code extraction with cs:{cs}, cs2: {cs2}, exc: {exc}")
-    
+            print(f"Exception at code extraction with cs:{cs}, exc: {exc}")
     pypi_package_names = pypi_packages.get_pypi_package_names()
-    
-    return post_id, parsed_data["code_snippets"], list(set(libs) & pypi_package_names)
+
+    return post_id, parsed_data["code_snippets"], sorted(list(set(libs) & pypi_package_names))
 
 
 def generate_imports_collection(
