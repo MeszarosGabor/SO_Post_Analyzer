@@ -10,7 +10,7 @@ ALL_PACKAGES = None
 
 def get_built_in_package_names():
     global BUILT_IN_PACKAGES
-    if not BUILT_IN_PACKAGES:
+    if BUILT_IN_PACKAGES is None:
         python2_url_path = "https://docs.python.org/2.7/py-modindex.html#cap-u"
         python3_url_path = "https://docs.python.org/3/py-modindex.html#cap-u"
 
@@ -29,7 +29,7 @@ def get_built_in_package_names():
 
 def get_pypi_package_names():
     global PYPI_PACKAGES
-    if not PYPI_PACKAGES:
+    if PYPI_PACKAGES is None:
         url = "https://pypi.org/simple/"
         resp = requests.get(url)
         if resp.status_code != 200:
@@ -41,6 +41,6 @@ def get_pypi_package_names():
 
 def get_all_package_names():
     global ALL_PACKAGES
-    if not ALL_PACKAGES:
+    if ALL_PACKAGES is None:
         ALL_PACKAGES =  get_built_in_package_names() | get_pypi_package_names()
     return ALL_PACKAGES

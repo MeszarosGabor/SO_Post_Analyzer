@@ -46,9 +46,9 @@ def main(input_path, output_path):
 
     individual_dates, pair_dates = find_first_appearances(input_path)
 
-    with open(f"{output_path}_indiv.json", 'w') as handle:
+    with open(f"{output_path}_indiv.jsonl", 'w') as handle:
         json.dump(individual_dates, handle, default=str)
-    with open(f"{output_path}_pairs.json", 'w') as handle:
+    with open(f"{output_path}_pairs.jsonl", 'w') as handle:
         json.dump(pair_dates, handle, default=str)
 
 
