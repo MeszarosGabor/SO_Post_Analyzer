@@ -5,6 +5,7 @@ import requests
 
 BUILT_IN_PACKAGES = None
 PYPI_PACKAGES = None
+ALL_PACKAGES = None
 
 
 def get_built_in_package_names():
@@ -39,4 +40,7 @@ def get_pypi_package_names():
 
 
 def get_all_package_names():
-    return get_built_in_package_names() | get_pypi_package_names()
+    global ALL_PACKAGES
+    if not ALL_PACKAGES:
+        ALL_PACKAGES =  get_built_in_package_names() | get_pypi_package_names()
+    return ALL_PACKAGES

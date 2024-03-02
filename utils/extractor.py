@@ -381,7 +381,7 @@ def extract_import_statements_from_code(code: str) -> typing.List[str]:
 def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
     libs = []
     for cs in parsed_data["code_snippets"]:
-        cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
+        #cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
         try:
             libs += extract_import_statements_from_code(cs)
         except Exception as exc:
