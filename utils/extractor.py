@@ -370,26 +370,40 @@ def extract_import_statements_from_code(code: str) -> typing.List[str]:
 
     for statement in regex_patterns.import_pattern.findall(code):
         words = statement.split()
-        if words[0] == "import":
-            import_statements.add(words[1].split(".")[0].rstrip(","))
-        elif len(words) > 1 and words[0] == "from":
-            import_statements.add(words[1].split(".")[0].rstrip(","))
+        # we need at least an >>import<< and a >>target<<
+        if len(words) < 2:
+            continue
+        if words[0] == "import" or (len(words) > 1 and words[0] == "from"):
+            import_candidate = words[1].split(".")[0].rstrip(",")
+            # This candidate might still contain multiple import statements
+            # such as >>import os,sys<<. or  noisy ones such as >>import os,<<
+            # We need to account for these.
+            for chunk in import_candidate.replace(';', ',').split(','):
+                if not chunk:
+                    continue
+                import_statements.add(chunk.strip())
 
-    return sorted(list(import_statements))
+    return import_statements
 
 
 def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
-    libs = []
+    libs = set()
     for cs in parsed_data["code_snippets"]:
-        #cs2 = cs.replace("\n", " ")  # TODO: investigate, probably obsolete!
         try:
-            libs += extract_import_statements_from_code(cs)
+            libs |= extract_import_statements_from_code(cs)
         except Exception as exc:
             print(f"Exception at code extraction with cs:{cs}, exc: {exc}")
 
     valid_package_names = valid_python_packages.get_all_package_names()
 
-    return post_id, parsed_data["code_snippets"], sorted(list(set(libs) & valid_package_names))
+    valid_libs = {lib for lib in libs if lib and lib.lower() in valid_package_names}
+    invalid_libs = libs - valid_libs
+
+    return (
+        post_id, parsed_data["code_snippets"],
+        sorted(list(valid_libs)),
+        sorted(list(invalid_libs)),
+    )
 
 
 def generate_imports_collection(
@@ -397,15 +411,20 @@ def generate_imports_collection(
         output_path: str,
 ) -> typing.Dict[str, int]:
     stats = collections.defaultdict(int)
-
+    invalid_libs_stat = collections. defaultdict(int)
     with open(output_path, "w") as out_handle:
         with open(input_path) as in_handle:
             for row in tqdm.tqdm(in_handle):
                 try:
                     parsed_row = json.loads(row)
                     post_id, data = extract_code_snippets_from_parsed_row(parsed_row)
-                    post_id, codes, import_list = extract_import_statements_from_single_row(
+                    post_id, codes, import_list, invalids = extract_import_statements_from_single_row(
                         post_id, parsed_data=data)
+
+                    # process invalid libs stats
+                    for invalid in invalids:
+                        invalid_libs_stat[invalid] += 1
+
                     if not import_list:
                         stats['empty list'] += 1
                         continue
@@ -421,4 +440,9 @@ def generate_imports_collection(
                     stats['success'] += 1
                 except Exception as exc:
                     stats[str(exc)] += 1
+
+    # save invalid libs stat
+    with open(f"{output_path}_invalid_libs.json", 'w') as handle:
+        json.dump(invalid_libs_stat, handle)
+
     return stats

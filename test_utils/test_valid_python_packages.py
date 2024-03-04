@@ -5,6 +5,22 @@ import pytest
 import utils.valid_python_packages as valid_python_packages
 
 
+@pytest.mark.parametrize(
+    "word",
+     [
+        'foo-bar',
+        'foo_bar',
+        'Foo-Bar',
+        'Foo_Bar',
+        'FOO-BAR',
+        'FOO_BAR',
+    ],
+)
+def test_to_lowercase_underscored(word):
+    assert valid_python_packages.to_lowercase_underscored([word]) == ['foo_bar']
+
+
+
 @pytest.fixture
 def set_BUILT_IN_PACKAGES():
     before_BUILT_IN_PACKAGES = valid_python_packages.BUILT_IN_PACKAGES

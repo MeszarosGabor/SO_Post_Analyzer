@@ -21,13 +21,13 @@ $pip install -r requirements.txt
 
 You may start with the parsing of the raw xml file and generate a python files metadata json file.
 ```
- python main.py -i test_xmls/SmallPost.xml -m metadata.jsonl -o out.jsonl
+ python generate_import_collection.py -i test_xmls/SmallPost.xml -m metadata.jsonl -o out.jsonl
 ```
 
 In case you already have a JSON file generated, you may opt out of the first step.
 
 ```
- python main.py -j python_posts.jsonl /SmallPost.xml -m metadata.json -o out.jsonl
+ python generate_import_collection.py -j <python_posts.jsonl> -o out.jsonl
 ```
 
 The output file will be a jsonl file, with the following JSON content on every line:
@@ -41,7 +41,13 @@ The output file will be a jsonl file, with the following JSON content on every l
 
 ## Generate First Appearances
 
-Once the import collection is generated, the first appearances script collects the timestamps the individual libraries as well as pairs of libraries were imported the first time. Output format:
+Once the import collection is generated, the first appearances script collects the timestamps the individual libraries as well as pairs of libraries were imported the first time.
+```
+python generate_first_appearances_files.py -i <input jsonl> -o <output.json>
+```
+
+
+### Output format:
 
 Individual:
 ```
