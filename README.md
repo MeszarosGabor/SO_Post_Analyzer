@@ -62,3 +62,14 @@ Pairs:
     "parameterized|unittest": "2008-08-28",
 }
 ```
+
+
+# UNDER THE HOOD...
+
+## Packages ignored
+We generally ignore packages that are not listed on Pypi and are not part of
+the Python built-in library list (checked for 2.7 and 3.12). An inclusion-list
+is populated for a handful of exceptions such as `rest_framework`.
+
+Notable (non-negligible hit count) ignored libraries include:
+- `mpl_toolkits` (most likely a deprecated `matplotlib` internal)

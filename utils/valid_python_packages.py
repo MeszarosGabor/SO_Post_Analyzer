@@ -8,6 +8,13 @@ BUILT_IN_PACKAGES = None
 PYPI_PACKAGES = None
 ALL_PACKAGES = None
 
+VALID_PACKAGE_WHITELIST = {
+    'rest_framework',  # https://pypi.org/project/djangorestframework/
+    'win32com',  # https://pypi.org/project/pywin32/;https://pbpython.com/windows-com.html
+    'win32api',  # https://pypi.org/project/pywin32/
+    'win32con',  # https://pypi.org/project/pywin32/
+}
+
 
 def to_lowercase_underscored(items: typing.List[str]):
     return [re.sub("-", "_", item).lower() for item in items]
@@ -29,6 +36,7 @@ def get_built_in_package_names() -> typing.Set:
         BUILT_IN_PACKAGES =\
             to_lowercase_underscored(re.findall(pattern, p2_resp.text)) +\
             to_lowercase_underscored(re.findall(pattern, p3_resp.text))
+
     return set(BUILT_IN_PACKAGES)
 
 
@@ -43,11 +51,17 @@ def get_pypi_package_names() -> typing.Set:
         PYPI_PACKAGES = set(
             to_lowercase_underscored(re.findall(pattern, resp.text))
         )
+
     return PYPI_PACKAGES
 
 
 def get_all_package_names() -> typing.Set:
-    global ALL_PACKAGES
+    global ALL_PACKAGES, VALID_PACKAGE_WHITELIST
     if ALL_PACKAGES is None:
-        ALL_PACKAGES =  get_built_in_package_names() | get_pypi_package_names()
+        ALL_PACKAGES = (
+            VALID_PACKAGE_WHITELIST |
+            get_built_in_package_names() |
+            get_pypi_package_names()
+        )
+
     return ALL_PACKAGES
