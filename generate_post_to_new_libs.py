@@ -25,6 +25,9 @@ def main(input_path, output_path):
                 if not date_posted:
                     stats["missing date"] += 1
                     continue
+                if not data.get("code_snippets"):
+                    stats["no code"] += 1
+                    continue
 
                 post_id, _, import_list, _ = extractor.extract_import_statements_from_single_row(
                     post_id, parsed_data=data)
@@ -52,6 +55,7 @@ def main(input_path, output_path):
             'distinct_libs_plot': distinct_libs_plot,
             'distinct_pairs_plot': distinct_pairs_plot,
         }, out_handle)
+    print(stats)
 
 
 if __name__ == "__main__":
