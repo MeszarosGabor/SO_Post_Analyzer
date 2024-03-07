@@ -11,8 +11,8 @@ import utils.valid_python_packages as valid_python_packages
 import utils.models as models
 import utils.regex_patterns as regex_patterns
 
+logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def _revise_post_blocks(post_blocks):
@@ -392,7 +392,7 @@ def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing
         try:
             libs |= extract_import_statements_from_code(cs)
         except Exception as exc:
-            print(f"Exception at code extraction with cs:{cs}, exc: {exc}")
+            logger.error(f"Exception at code extraction with cs:{cs}, exc: {exc}")
 
     valid_package_names = valid_python_packages.get_all_package_names()
 

@@ -7,10 +7,8 @@ import lxml.etree
 
 import utils.models as models
 
+logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-
 
 
 def fast_iter(context, func, *args, **kwargs):
@@ -32,7 +30,7 @@ def fast_iter(context, func, *args, **kwargs):
                 while ancestor.getprevious() is not None:
                     del ancestor.getparent()[0]
         except Exception as exc:
-            print(f"Exception! {str(exc)}")
+            logger.error(f"Exception! {str(exc)}")
     del context
 
 

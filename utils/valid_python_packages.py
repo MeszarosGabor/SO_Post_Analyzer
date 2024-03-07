@@ -10,7 +10,7 @@ ALL_PACKAGES = None
 
 VALID_PACKAGE_WHITELIST = {
     'rest_framework',  # https://pypi.org/project/djangorestframework/
-    'win32com',  # https://pypi.org/project/pywin32/;https://pbpython.com/windows-com.html
+    'win32com',  # https://pypi.org/project/pywin32/;https://pbpython.com/windows-com.html   # noqa: E501
     'win32api',  # https://pypi.org/project/pywin32/
     'win32con',  # https://pypi.org/project/pywin32/
 }
@@ -31,8 +31,8 @@ def get_built_in_package_names() -> typing.Set:
 
         if p2_resp.status_code != 200 or p3_resp.status_code != 200:
             raise ValueError("Could not collect built-in package names")
-        
-        pattern = '<code class="xref">(\w+)</code>'
+
+        pattern = r'<code class="xref">(\w+)</code>'
         BUILT_IN_PACKAGES =\
             to_lowercase_underscored(re.findall(pattern, p2_resp.text)) +\
             to_lowercase_underscored(re.findall(pattern, p3_resp.text))
