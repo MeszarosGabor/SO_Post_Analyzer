@@ -16,9 +16,11 @@ def find_first_appearances_and_count_appearances(
         data: typing.List[typing.Dict]
 ):
     libs_count = collections.defaultdict(int)
-    pair_count = collections.defaultdict(int)
-    libs_dates = {}
-    pair_dates = {}
+    pairs_count = collections.defaultdict(int)
+    all_libs_dates = collections.defaultdict(list)
+    all_pairs_dates = collections.defaultdict(list)
+    libs_first_dates = {}
+    pairs_first_dates = {}
 
     for row in tqdm.tqdm(data):
         dt = datetime.datetime.strptime(
@@ -27,23 +29,29 @@ def find_first_appearances_and_count_appearances(
         # create or update entry for individual timestamp
         for package in row.get("imports"):
             libs_count[package] += 1
+            all_libs_dates[package].append(dt)
             if (
-                package not in libs_dates or
-                libs_dates[package] > dt
+                package not in libs_first_dates or
+                libs_first_dates[package] > dt
             ):
-                libs_dates[package] = dt
+                libs_first_dates[package] = dt
 
         # create or update entry for pair timestamp
         for p1, p2 in itertools.combinations(row.get("imports"), 2):
             canonical_pair_name = "|".join(sorted([p1, p2]))
-            pair_count[canonical_pair_name] += 1
+            pairs_count[canonical_pair_name] += 1
+            all_pairs_dates[canonical_pair_name].append(dt)
             if (
-                canonical_pair_name not in pair_dates or
-                pair_dates[canonical_pair_name] > dt
+                canonical_pair_name not in pairs_first_dates or
+                pairs_first_dates[canonical_pair_name] > dt
             ):
-                pair_dates[canonical_pair_name] = dt
+                pairs_first_dates[canonical_pair_name] = dt
 
-    return libs_count, pair_count, libs_dates, pair_dates
+    return (
+        libs_count, pairs_count,
+        all_libs_dates, all_pairs_dates,
+        libs_first_dates, pairs_first_dates,
+    )
 
 
 @click.command()
@@ -55,18 +63,26 @@ def main(input_path, output_path):
         data = json.load(handle)
     logger.info("Input JSON loaded.")
 
-    libs_count, pair_count, individual_dates, pair_dates =\
+    (
+        libs_count, pairs_count,
+        all_libs_dates, all_pairs_dates,
+        libs_first_dates, pairs_first_dates
+    ) =\
         find_first_appearances_and_count_appearances(data)
 
     logger.info("Generating output files...")
     with open(f"{output_path}_libs_count.json", 'w') as handle:
         json.dump(libs_count, handle, default=str)
-    with open(f"{output_path}_pair_count.json", 'w') as handle:
-        json.dump(pair_count, handle, default=str)
-    with open(f"{output_path}_indiv.json", 'w') as handle:
-        json.dump(individual_dates, handle, default=str)
-    with open(f"{output_path}_pairs.json", 'w') as handle:
-        json.dump(pair_dates, handle, default=str)
+    with open(f"{output_path}_pairs_count.json", 'w') as handle:
+        json.dump(pairs_count, handle, default=str)
+    with open(f"{output_path}_all_libs_dates.json", 'w') as handle:
+        json.dump(all_libs_dates, handle, default=str)
+    with open(f"{output_path}_all_pairs_dates.json", 'w') as handle:
+        json.dump(all_pairs_dates, handle, default=str)
+    with open(f"{output_path}_libs_first_dates.json", 'w') as handle:
+        json.dump(libs_first_dates, handle, default=str)
+    with open(f"{output_path}_pairs_first_dates.json", 'w') as handle:
+        json.dump(pairs_first_dates, handle, default=str)
 
 
 if __name__ == "__main__":
