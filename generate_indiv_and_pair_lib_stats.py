@@ -32,9 +32,13 @@ def find_first_appearances_and_count_appearances(
             all_libs_dates[package].append(dt)
             if (
                 package not in libs_first_dates or
-                libs_first_dates[package] > dt
+                libs_first_dates[package]["date"] > dt
             ):
-                libs_first_dates[package] = dt
+                libs_first_dates[package] = {
+                    "id": row["id"],
+                    "poster_id": row["poster_id"],
+                    "date": dt,
+                }
 
         # create or update entry for pair timestamp
         for p1, p2 in itertools.combinations(row.get("imports"), 2):
@@ -43,10 +47,13 @@ def find_first_appearances_and_count_appearances(
             all_pairs_dates[canonical_pair_name].append(dt)
             if (
                 canonical_pair_name not in pairs_first_dates or
-                pairs_first_dates[canonical_pair_name] > dt
+                pairs_first_dates[canonical_pair_name]["date"] > dt
             ):
-                pairs_first_dates[canonical_pair_name] = dt
-
+                pairs_first_dates[canonical_pair_name] = {
+                    "id": row["id"],
+                    "poster_id": row["poster_id"],
+                    "date": dt,
+                }
     return (
         libs_count, pairs_count,
         all_libs_dates, all_pairs_dates,
