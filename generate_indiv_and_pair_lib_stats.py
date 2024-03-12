@@ -21,10 +21,14 @@ def find_first_appearances_and_count_appearances(
     all_pairs_dates = collections.defaultdict(list)
     libs_first_dates = {}
     pairs_first_dates = {}
+    user_to_posts = collections.defaultdict(list)
 
     for row in tqdm.tqdm(data):
         dt = datetime.datetime.strptime(
             row.get("date"), "%Y-%m-%dT%H:%M:%S.%f").date()
+        
+        # document which users posted which posts
+        user_to_posts[row["poster_id"]].append(row["id"])
 
         # create or update entry for individual timestamp
         for package in row.get("imports"):
@@ -55,7 +59,7 @@ def find_first_appearances_and_count_appearances(
                     "date": dt,
                 }
     return (
-        libs_count, pairs_count,
+        libs_count, pairs_count, user_to_posts,
         all_libs_dates, all_pairs_dates,
         libs_first_dates, pairs_first_dates,
     )
@@ -71,13 +75,14 @@ def main(input_path, output_path):
     logger.info("Input JSON loaded.")
 
     (
-        libs_count, pairs_count,
+        libs_count, pairs_count, user_to_posts,
         all_libs_dates, all_pairs_dates,
-        libs_first_dates, pairs_first_dates
+        libs_first_dates, pairs_first_dates,
     ) =\
         find_first_appearances_and_count_appearances(data)
-
     logger.info("Generating output files...")
+    with open(f"{output_path}_user_to_posts.json", "w") as handle:
+        json.dump(user_to_posts, handle)
     with open(f"{output_path}_libs_count.json", 'w') as handle:
         json.dump(libs_count, handle, default=str)
     with open(f"{output_path}_pairs_count.json", 'w') as handle:

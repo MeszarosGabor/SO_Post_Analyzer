@@ -35,6 +35,18 @@ def generate_extracted_import_metadata(
                 post_id, codes, import_list, invalids =\
                     extractor.extract_import_statements_from_single_row(
                         post_id, parsed_data=data)
+                
+                if not post_id:
+                    stats["no post id"] += 1
+                    continue
+
+                if not data.get("poster_id"):
+                    stats["no poster id"] += 1
+                    continue
+
+                if not data.get("date_posted"):
+                    stats["no date posted"] += 1
+                    continue
 
                 if not data.get("code_snippets"):
                     stats["no code"] += 1
@@ -47,6 +59,7 @@ def generate_extracted_import_metadata(
                 if not import_list:
                     stats['empty list'] += 1
                     continue
+
                 payload = {
                     "id": post_id,
                     "imports": import_list,
