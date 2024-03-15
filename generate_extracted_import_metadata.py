@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def generate_extracted_import_metadata(
         input_path: str,
+        target_language: str,
 ) -> typing.Dict[str, int]:
     stats = collections.defaultdict(int)
     valid_libs_stats = []
@@ -34,7 +35,7 @@ def generate_extracted_import_metadata(
                     extractor.extract_code_snippets_from_parsed_row(parsed_row)
                 post_id, codes, import_list, invalids =\
                     extractor.extract_import_statements_from_single_row(
-                        post_id, parsed_data=data)
+                        post_id, parsed_data=data, target_language=target_language)
                 
                 if not post_id:
                     stats["no post id"] += 1
@@ -84,14 +85,18 @@ def generate_extracted_import_metadata(
 
 
 @click.command()
+@click.option("-t", "--target_language", type=str, default="python")
 @click.option("-i", "--raw_input_path", type=str, default=None)
+@click.option("--parse_xml_only", is_flag=True, show_default=True, default=False,)
 @click.option("-j", "--curated_posts_path", type=str, default=None)
 @click.option("-m", "--metadata_output_path", type=str, default="meta.json")
 @click.option("-o", "--imports_output_path", type=str)
 @click.option("--gen_invalids", is_flag=True, show_default=True, default=False,
               help="Generates a JSON collection of encountered invalid libs.")
 def main(
+    target_language,
     raw_input_path,
+    parse_xml_only,
     curated_posts_path,
     metadata_output_path,
     imports_output_path,
@@ -107,28 +112,38 @@ def main(
             "Exactly one of raw_input_path and curated_posts_path "
             "should be provided!"
         )
+    if not raw_input_path and parse_xml_only:
+        raise ValueError(
+            "The flag >>parse_xml_only<< is only meaningful if we process a raw XML input!"
+        )
 
     if raw_input_path:
+        logger.info(f"Starting XML search. Target language is {target_language}")
         xml_parser.parse_xml_source_and_generate_output(
+            target_language,
             raw_input_path,
             metadata_output_path,
         )
         curated_posts_path = metadata_output_path
+        logger.info(f"XML extraction finished. Output file is {curated_posts_path}")
+        if parse_xml_only:
+            logger.info("Parse-XML-only enabled, exiting execution.")
+            return
 
     valid_libs_stats, invalid_libs_stats, daily_post_stats, stats =\
-        generate_extracted_import_metadata(input_path=curated_posts_path)
+        generate_extracted_import_metadata(input_path=curated_posts_path, target_language=target_language)
 
-    with open(f"{imports_output_path}_post_stats.json", "w") as out_handle:
+    with open(f"{imports_output_path}_{target_language}_post_stats.json", "w") as out_handle:
         json.dump(valid_libs_stats, out_handle)
 
-    with open(f"{imports_output_path}_daily_post_stats.json", "w") as out_handle:
+    with open(f"{imports_output_path}_{target_language}_daily_post_stats.json", "w") as out_handle:
         json.dump(daily_post_stats, out_handle)
 
     if gen_invalids:
-        with open(f"{imports_output_path}_invalid_libs.json", 'w') as handle:
+        with open(f"{imports_output_path}_{target_language}_invalid_libs.json", 'w') as handle:
             json.dump(invalid_libs_stats, handle)
 
-    logger.info(stats)
+    logger.info(f"Extraction finished,  stats: {stats}")
 
 
 if __name__ == "__main__":

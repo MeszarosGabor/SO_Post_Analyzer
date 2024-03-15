@@ -3,6 +3,8 @@ import typing
 
 import requests
 
+from utils.common import to_lowercase_underscored
+
 
 BUILT_IN_PACKAGES = None
 PYPI_PACKAGES = None
@@ -14,10 +16,6 @@ VALID_PACKAGE_WHITELIST = {
     'win32api',  # https://pypi.org/project/pywin32/
     'win32con',  # https://pypi.org/project/pywin32/
 }
-
-
-def to_lowercase_underscored(items: typing.List[str]):
-    return [re.sub("-", "_", item).lower() for item in items]
 
 
 def get_built_in_package_names() -> typing.Set:

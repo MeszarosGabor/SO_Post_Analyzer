@@ -50,8 +50,6 @@ contains_letter_or_digit_regex = re.compile(r"[a-zA-Z0-9]")
 
 job_name_regex = re.compile(r"[^-a-z0-9]+")
 
-# Captures python import statements
-import_pattern = re.compile(r"(?m)^\s*(from[^\n]+|import[^\n]+)")
 
 import_pattern_by_language = {
     'python': re.compile(r"(?m)^\s*(from[^\n]+|import[^\n]+)"), #syntax: various but import XYZ

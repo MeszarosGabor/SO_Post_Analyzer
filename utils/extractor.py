@@ -7,7 +7,7 @@ import typing
 
 import tqdm
 
-import utils.valid_python_packages as valid_python_packages 
+import utils.valid_packages as valid_packages
 import utils.models as models
 import utils.regex_patterns as regex_patterns
 
@@ -365,10 +365,21 @@ def extract_code_snippets_from_parsed_row(parsed_row: typing.Dict) -> None:
         )
 
 
-def extract_import_statements_from_code(code: str) -> typing.List[str]:
+def extract_import_statements_from_code(code: str, target_language: str) -> typing.List[str]:
+    language_specific_extractor = {
+        "python": extract_python_import_statements_from_code,
+        "ruby": extract_ruby_import_statements_from_code,
+
+    }.get(target_language)
+    if not language_specific_extractor:
+        raise Exception("Language import extract is not supported, missing function!")
+    return language_specific_extractor(code)
+
+
+def extract_python_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
 
-    for statement in regex_patterns.import_pattern.findall(code):
+    for statement in regex_patterns.import_pattern_by_language['python'].findall(code):
         words = statement.split()
         # we need at least an >>import<< and a >>target<<
         if len(words) < 2:
@@ -386,18 +397,29 @@ def extract_import_statements_from_code(code: str) -> typing.List[str]:
     return import_statements
 
 
-def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict):
+def extract_ruby_import_statements_from_code(code: str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['ruby'].findall(code):
+        import_statements.add(statement.split("/")[0].strip())
+
+    return import_statements
+
+
+def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict, target_language: str):
     libs = set()
     for cs in parsed_data["code_snippets"]:
         try:
-            libs |= extract_import_statements_from_code(cs)
+            libs |= extract_import_statements_from_code(cs, target_language)
         except Exception as exc:
             logger.error(f"Exception at code extraction with cs:{cs}, exc: {exc}")
 
-    valid_package_names = valid_python_packages.get_all_package_names()
-
-    valid_libs = {lib for lib in libs if lib and lib.lower() in valid_package_names}
-    invalid_libs = libs - valid_libs
+    valid_package_names = valid_packages.get_valid_packages(target_language)
+    if valid_package_names is None: #  skipping validation
+        valid_libs = libs
+        invalid_libs = set()
+    else:
+        valid_libs = {lib for lib in libs if lib and lib.lower() in valid_package_names}
+        invalid_libs = libs - valid_libs
 
     return (
         post_id, parsed_data["code_snippets"],

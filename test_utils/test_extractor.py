@@ -41,8 +41,8 @@ import utils.extractor as extractor
         ),
     ]
 )
-def test_extract_import_statements_from_code(snippet, expected_imports):
-    imports = extractor.extract_import_statements_from_code(snippet)
+def test_extract_import_statements_from_code_python(snippet, expected_imports):
+    imports = extractor.extract_import_statements_from_code(snippet, "python")
     assert imports == expected_imports
 
 
@@ -70,9 +70,9 @@ def test_extract_import_statements_from_code(snippet, expected_imports):
         ),
     ],
 )
-def test_extract_import_statements_from_single_row_find_valid(parsed_row, expected_imports):
+def test_extract_import_statements_from_single_row_find_valid_python(parsed_row, expected_imports):
     with patch(
-        "utils.valid_python_packages.get_all_package_names",
+        "utils.valid_packages.get_valid_packages",
         return_value={
             'urllib2',
             'beautifulsoup',
@@ -82,7 +82,8 @@ def test_extract_import_statements_from_single_row_find_valid(parsed_row, expect
     ):
         _, _, import_list, _ = extractor.extract_import_statements_from_single_row(
             post_id="123",
-            parsed_data=parsed_row
+            parsed_data=parsed_row,
+            target_language="python",
         )
     assert import_list == expected_imports
 
@@ -102,15 +103,56 @@ def test_extract_import_statements_from_single_row_find_valid(parsed_row, expect
         ),
     ],
 )
-def test_extract_import_statements_from_single_row_find_invalid(parsed_row, expected_imports):
+def test_extract_import_statements_from_single_row_find_invalid_python(parsed_row, expected_imports):
     with patch(
-        "utils.valid_python_packages.get_all_package_names",
+        "utils.valid_packages.get_valid_packages",
         return_value={
             'urllib2',
             }
     ):
         _, _, _, invalid_list = extractor.extract_import_statements_from_single_row(
             post_id="123",
-            parsed_data=parsed_row
+            parsed_data=parsed_row,
+            target_language="python",
         )
     assert invalid_list == expected_imports
+
+
+
+@pytest.mark.parametrize(
+    "parsed_row,expected_imports",
+    [
+        pytest.param(
+            {
+                "code_snippets":  [
+                    "require 'rubygems'",
+                ],
+            },
+            ['rubygems',],
+            id="Single line single import"
+        ),
+        pytest.param(
+            {
+                "code_snippets":  [
+                    "require 'rubygems'\nrequire 'scrubyt'\ndata =",
+                ],
+            },
+            ['rubygems', 'scrubyt'],
+            id="Multiline multiple imports"
+        ),
+    ],
+)
+def test_extract_import_statements_from_single_row_find_valid_ruby(parsed_row, expected_imports):
+    with patch(
+        "utils.valid_packages.get_valid_packages",
+        return_value={
+            'rubygems',
+            'scrubyt',
+            }
+    ):
+        _, _, import_list, _ = extractor.extract_import_statements_from_single_row(
+            post_id="123",
+            parsed_data=parsed_row,
+            target_language="ruby",
+        )
+    assert import_list == expected_imports

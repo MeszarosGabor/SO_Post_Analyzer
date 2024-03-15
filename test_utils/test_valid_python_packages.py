@@ -6,53 +6,27 @@ import pytest
 import utils.valid_python_packages as valid_python_packages
 
 
-@pytest.mark.parametrize(
-    "word",
-     [
-        'foo-bar',
-        'foo_bar',
-        'Foo-Bar',
-        'Foo_Bar',
-        'FOO-BAR',
-        'FOO_BAR',
-    ],
-)
-def test_to_lowercase_underscored(word):
-    assert valid_python_packages.to_lowercase_underscored([word]) == ['foo_bar']
-
-
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def set_VALID_PACKAGE_WHITELIST():
     before_VALID_PACKAGE_WHITELIST = valid_python_packages.VALID_PACKAGE_WHITELIST
     yield
     valid_python_packages.VALID_PACKAGE_WHITELIST = before_VALID_PACKAGE_WHITELIST
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def set_BUILT_IN_PACKAGES():
     before_BUILT_IN_PACKAGES = valid_python_packages.BUILT_IN_PACKAGES
     yield
     valid_python_packages.BUILT_IN_PACKAGES = before_BUILT_IN_PACKAGES
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def set_PYPI_PACKAGES():
     before_PYPI_PACKAGES = valid_python_packages.PYPI_PACKAGES
     yield
     valid_python_packages.PYPI_PACKAGES = before_PYPI_PACKAGES
 
 
-@pytest.mark.usefixtures(
-    "set_VALID_PACKAGE_WHITELIST",
-    "set_BUILT_IN_PACKAGES",
-    "set_PYPI_PACKAGES",
-)
-@pytest.fixture
-def set_globals():
-    pass
-
-
-@pytest.mark.usefixtures("set_globals")
 def test_get_built_in_package_names_only_call_twice():
     mock_resp = MagicMock()
     mock_resp.status_code = 200
@@ -67,7 +41,6 @@ def test_get_built_in_package_names_only_call_twice():
         assert len(mock_requests.method_calls) == 2
 
 
-@pytest.mark.usefixtures("set_globals")
 def test_get_pypi_package_names_only_call_once():
     mock_resp = MagicMock()
     mock_resp.status_code = 200
@@ -82,7 +55,6 @@ def test_get_pypi_package_names_only_call_once():
         assert len(mock_requests.method_calls) == 1
 
 
-@pytest.mark.usefixtures("set_globals")
 def test_get_all_package_names_only_call_once():
     with (
         patch("utils.valid_python_packages.get_built_in_package_names") as

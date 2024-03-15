@@ -45,12 +45,13 @@ def link_a_to_q_tags(
 
 def get_row_data_json(
     row,
+    target_language: str,
     posts_to_tags: typing.Dict,
     output_path: str,
 ):
     with open(output_path, "a") as outfile:
         tags = posts_to_tags.get(row.attrib.get("Id", ""), "")
-        if "python" in tags:
+        if target_language in tags:
             post_dict = {}
             post_dict[row.attrib.get("Id", "")] = [
                 row.attrib.get(x, "") for x in models.POSTS_COLS
@@ -60,7 +61,8 @@ def get_row_data_json(
 
 
 def parse_xml_source_and_generate_output(
-        xml_path: str, output_path: str) -> None:
+        target_language:str, xml_path: str, output_path: str
+) -> None:
     questions_to_tags = {}
     answers_to_questions = {}
     posts_to_tags = {}
@@ -79,7 +81,7 @@ def parse_xml_source_and_generate_output(
         stats_posts_to_tags_questions["success"] = 1
     logging.info(
         "Posts_to_tags population (questions) finished. "
-        "Stats: {stats_posts_to_tags_questions}"
+        f"Stats: {stats_posts_to_tags_questions}"
     )
 
     logging.info("Posts_to_tags population (answers) started")
@@ -92,8 +94,8 @@ def parse_xml_source_and_generate_output(
             stats_posts_to_tags_answers["key error"] += 1
     logging.info(
         "Posts_to_tags population (answers)finished. "
-        "Stats: {stats_posts_to_tags_answers}"
+        f"Stats: {stats_posts_to_tags_answers}"
     )
 
     context = lxml.etree.iterparse(xml_path)
-    fast_iter(context, get_row_data_json, posts_to_tags, output_path)
+    fast_iter(context, get_row_data_json, target_language, posts_to_tags, output_path)
