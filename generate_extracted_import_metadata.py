@@ -85,7 +85,7 @@ def generate_extracted_import_metadata(
 
 
 @click.command()
-@click.option("-t", "--target_language", type=str)
+@click.option("-t", "--target_language", type=str, required=True)
 @click.option("-i", "--raw_input_path", type=str, default=None)
 @click.option("--parse_xml_only", is_flag=True, show_default=True, default=False,)
 @click.option("-j", "--curated_posts_path", type=str, default=None)

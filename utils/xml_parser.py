@@ -1,6 +1,7 @@
 import collections
 import json
 import logging
+import re
 import typing
 
 import lxml.etree
@@ -51,11 +52,21 @@ def get_row_data_json(
 ):
     with open(output_path, "a") as outfile:
         tags = posts_to_tags.get(row.attrib.get("Id", ""), "")
-        if target_language in tags:
+        tokenized_tags = re.findall("<(.+?)>", tags)
+
+        # Today this is a C-specific precation to avoid C/C++ and C/C# double-counting.
+        forbidden_tags = {"c": ["c++", "c#"]}.get(target_language, [])
+
+        if target_language in tokenized_tags and all([lang not in tokenized_tags for lang in forbidden_tags]):
             post_dict = {}
             post_dict[row.attrib.get("Id", "")] = [
-                row.attrib.get(x, "") for x in models.POSTS_COLS
+                row.attrib.get(
+                    # Tags are only persisted for questions. We need to manually insert them
+                    x, (tags if x == "Tags" else "")
+                ) for x in models.POSTS_COLS
             ]
+
+
             json.dump(post_dict, outfile)
             outfile.write("\n")
 
