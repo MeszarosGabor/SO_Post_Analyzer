@@ -42,3 +42,15 @@ POSTS_COLS = [
     "AnswerCount",
     "ParentId",
 ]
+
+LANGUAGES = {
+    "c",
+    "c++",
+    "c#",
+    "python",
+    "ruby",
+    "rust",
+    "java",
+    "julia",
+    "r",
+}
