@@ -54,7 +54,7 @@ def main(input_path, output_path):
     
     logger.info(stats)
     logger.info("Generating output file...")
-    with open(output_path, 'w') as out_handle:
+    with open(f"{output_path}_post_to_libs.json", 'w') as out_handle:
         json.dump(data, out_handle)
 
 
