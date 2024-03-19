@@ -52,12 +52,10 @@ def get_row_data_json(
 ):
     with open(output_path, "a") as outfile:
         tags = posts_to_tags.get(row.attrib.get("Id", ""), "")
-        tokenized_tags = re.findall("<(.+?)>", tags)
+        tokenized_tags = set(re.findall("<(.+?)>", tags))
 
-        # Today this is a C-specific precation to avoid C/C++ and C/C# double-counting.
-        forbidden_tags = {"c": ["c++", "c#"]}.get(target_language, [])
-
-        if target_language in tokenized_tags and all([lang not in tokenized_tags for lang in forbidden_tags]):
+        recognized_tags = tokenized_tags & models.LANGUAGES
+        if recognized_tags == {target_language}:
             post_dict = {}
             post_dict[row.attrib.get("Id", "")] = [
                 row.attrib.get(
