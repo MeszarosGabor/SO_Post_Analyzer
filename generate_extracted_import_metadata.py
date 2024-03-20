@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 def generate_extracted_import_metadata(
         input_path: str,
         target_language: str,
+        bypass_validation: bool,
 ) -> typing.Dict[str, int]:
     stats = collections.defaultdict(int)
     valid_libs_stats = []
@@ -35,7 +36,10 @@ def generate_extracted_import_metadata(
                     extractor.extract_code_snippets_from_parsed_row(parsed_row)
                 post_id, codes, import_list, invalids =\
                     extractor.extract_import_statements_from_single_row(
-                        post_id, parsed_data=data, target_language=target_language)
+                        post_id,
+                        parsed_data=data,
+                        target_language=target_language,
+                        bypass_validation=bypass_validation)
                 
                 if not post_id:
                     stats["no post id"] += 1
@@ -87,10 +91,12 @@ def generate_extracted_import_metadata(
 @click.command()
 @click.option("-t", "--target_language", type=str, required=True)
 @click.option("-i", "--raw_input_path", type=str, default=None)
-@click.option("--parse_xml_only", is_flag=True, show_default=True, default=False,)
+@click.option("--parse_xml_only", is_flag=True, show_default=True, default=False)
 @click.option("-j", "--curated_posts_path", type=str, default=None)
 @click.option("-m", "--metadata_output_path", type=str, default="meta.json")
 @click.option("-o", "--imports_output_path", type=str)
+@click.option("-x", "--bypass_validation", is_flag=True, show_default=True, default=False,
+              help="Should we validate the packages obtained?")
 @click.option("--gen_invalids", is_flag=True, show_default=True, default=False,
               help="Generates a JSON collection of encountered invalid libs.")
 def main(
@@ -100,6 +106,7 @@ def main(
     curated_posts_path,
     metadata_output_path,
     imports_output_path,
+    bypass_validation,
     gen_invalids,
 ):
     if (
@@ -131,7 +138,10 @@ def main(
             return
 
     valid_libs_stats, invalid_libs_stats, daily_post_stats, stats =\
-        generate_extracted_import_metadata(input_path=curated_posts_path, target_language=target_language)
+        generate_extracted_import_metadata(
+            input_path=curated_posts_path, 
+            target_language=target_language,
+            bypass_validation=bypass_validation)
 
     with open(f"{imports_output_path}_{target_language}_post_stats.json", "w") as out_handle:
         json.dump(valid_libs_stats, out_handle)

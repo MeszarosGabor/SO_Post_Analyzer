@@ -369,7 +369,7 @@ def extract_import_statements_from_code(code: str, target_language: str) -> typi
     language_specific_extractor = {
         "python": extract_python_import_statements_from_code,
         "ruby": extract_ruby_import_statements_from_code,
-
+        "rust": extract_rust_import_statements_from_code,
     }.get(target_language)
     if not language_specific_extractor:
         raise Exception("Language import extract is not supported, missing function!")
@@ -405,7 +405,22 @@ def extract_ruby_import_statements_from_code(code: str) -> typing.List[str]:
     return import_statements
 
 
-def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing.Dict, target_language: str):
+def extract_rust_import_statements_from_code(code: str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['rust'].findall(code):
+        target = statement[0] if statement[0] else statement[1]
+        if not target:
+            continue
+        import_statements.add(target.strip())
+
+    return import_statements
+
+
+def extract_import_statements_from_single_row(
+        post_id: str,
+        parsed_data: typing.Dict,
+        target_language: str,
+        bypass_validation: bool):
     libs = set()
     for cs in parsed_data["code_snippets"]:
         try:
@@ -413,13 +428,16 @@ def extract_import_statements_from_single_row(post_id: str,  parsed_data: typing
         except Exception as exc:
             logger.error(f"Exception at code extraction with cs:{cs}, exc: {exc}")
 
+    if bypass_validation:
+        return (
+            post_id, parsed_data["code_snippets"],
+            sorted(list(libs)),
+            sorted([]),
+        )
+
     valid_package_names = valid_packages.get_valid_packages(target_language)
-    if valid_package_names is None: #  skipping validation
-        valid_libs = libs
-        invalid_libs = set()
-    else:
-        valid_libs = {lib for lib in libs if lib and lib.lower() in valid_package_names}
-        invalid_libs = libs - valid_libs
+    valid_libs = {lib for lib in libs if lib and lib.lower() in valid_package_names}
+    invalid_libs = libs - valid_libs
 
     return (
         post_id, parsed_data["code_snippets"],

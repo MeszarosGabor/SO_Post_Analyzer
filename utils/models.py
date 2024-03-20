@@ -51,6 +51,12 @@ LANGUAGES = {
     "ruby",
     "rust",
     "java",
+    "javascript",
     "julia",
     "r",
+    "perl",
+    "php",
+    "matlab",
+    "objective-c",
+    "swift",
 }
