@@ -408,7 +408,7 @@ def extract_ruby_import_statements_from_code(code: str) -> typing.List[str]:
 def extract_rust_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
     for statement in regex_patterns.import_pattern_by_language['rust'].findall(code):
-        target = statement[0] if statement[0] else statement[1]
+        target = statement[0].split(":")[0]
         if not target:
             continue
         import_statements.add(target.strip())
