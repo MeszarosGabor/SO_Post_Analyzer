@@ -54,10 +54,11 @@ job_name_regex = re.compile(r"[^-a-z0-9]+")
 import_pattern_by_language = {
     'python': re.compile(r"(?m)^\s*(from[^\n]+|import[^\n]+)"), #syntax: various but import XYZ
     'ruby': re.compile(r"require\s*['\"](.*?)['\"]"), # syntax: require XYZ
-    'rust':re.compile(r"(?:extern crate\s+(\w+)|use\s+(!std::)(\w+))"), #extern crate XYZ OR use XYZ
+    'rust': re.compile(r"^use\s+([\w:]+)(::\{\w+(,\s*\w+)*\})?;$"),
+    #'rust':re.compile(r"(?:extern crate\s+(\w+)|use\s+(!std::)(\w+))"), #extern crate XYZ OR use XYZ
     'r':re.compile(r"library\s*\(\s*['\"](.*?)['\"]\s*\)"), #library(XYZ)
     'julia':re.compile(r"(?:using|import)\s+([A-Za-z0-9_]+(?:\s*,\s*[A-Za-z0-9_]+)*)"), #various, but using XYZ or import XYZ
-    'c':re.compile(r'#include\s*(?:[<"])([^>"]+)[>"]') #various but include <XYZ> or include "XYZ",
+    'c':re.compile(r'#include\s*(?:[<"])([^>"]+)[>"]'), #various but include <XYZ> or include "XYZ",
     'javascript':re.compile(r"require\(['\"](.*?)['\"]\)|import(?:.*?from\s+)?['\"](.*?)['\"];?"),#require('X') and import y from 'Y'
     'java':re.compile(r'import\s+(?:static\s+)?([a-zA-Z0-9_]+)\..*?;'), #import X.Y -> get X, import static Z -> get Z
     'perl':re.compile(r'use\s+([a-zA-Z0-9_]+)(?:::[a-zA-Z0-9_]+)*;'),
