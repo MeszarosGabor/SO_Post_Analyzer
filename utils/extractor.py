@@ -370,6 +370,10 @@ def extract_import_statements_from_code(code: str, target_language: str) -> typi
         "python": extract_python_import_statements_from_code,
         "ruby": extract_ruby_import_statements_from_code,
         "rust": extract_rust_import_statements_from_code,
+        "javascript": extract_javascript_import_statements_from_code,
+        "java": extract_java_import_statements_from_code,
+        "c": extract_c_import_statements_from_code,
+        "r": extract_r_import_statements_from_code,
     }.get(target_language)
     if not language_specific_extractor:
         raise Exception("Language import extract is not supported, missing function!")
@@ -412,6 +416,49 @@ def extract_rust_import_statements_from_code(code: str) -> typing.List[str]:
         if not target:
             continue
         import_statements.add(target.strip())
+
+    return import_statements
+
+
+def extract_javascript_import_statements_from_code(code:str) ->typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['javascript'].findall(code):
+        target = statement[0] if statement[0] else (statement[1] if statement[1] else statement[2])
+        if not target.strip() or re.search("\s", target):  # for some reason we are receiving whitespace-containing garbage
+            # TODO: investigate the whitespaces!  
+            continue
+        import_statements.add(re.split("/|\.", target)[0].strip())
+
+    return import_statements
+
+
+def extract_java_import_statements_from_code(code:str) ->typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['java'].findall(code):
+        if not statement:
+            continue
+        import_statements.add(statement.strip())
+
+    return import_statements
+
+
+def extract_c_import_statements_from_code(code:str) ->typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['c'].findall(code):
+        if not statement:
+            continue
+        import_statements.add(statement.split(".")[0].strip())
+
+    return import_statements
+
+
+def extract_r_import_statements_from_code(code:str) ->typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['r'].findall(code):
+        target = statement[0].strip() if statement[0].strip() else statement[1].strip()
+        if not target:
+            continue
+        import_statements.add(target)
 
     return import_statements
 

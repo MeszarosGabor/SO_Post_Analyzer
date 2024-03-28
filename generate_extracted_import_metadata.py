@@ -30,6 +30,7 @@ def generate_extracted_import_metadata(
         open(input_path) as in_handle,
     ):
         for row in tqdm.tqdm(in_handle):
+            stats["TOTAL"] += 1
             try:
                 parsed_row = json.loads(row)
                 post_id, data =\
@@ -61,9 +62,13 @@ def generate_extracted_import_metadata(
                 for invalid in invalids:
                     invalid_libs_stats[invalid] += 1
 
+                # TODO: this should not happen here.
+                # only keep reasonably looking imports. Ditch empty strings, etc.
+                import_list = [item.strip() for item in import_list if item.strip()]
+
+
                 if not import_list:
                     stats['empty list'] += 1
-                    continue
 
                 payload = {
                     "id": post_id,
@@ -84,6 +89,7 @@ def generate_extracted_import_metadata(
                 stats['success'] += 1
             except Exception as exc:
                 stats[str(exc)] += 1
+            
 
     return valid_libs_stats, invalid_libs_stats, daily_post_stats, stats
 

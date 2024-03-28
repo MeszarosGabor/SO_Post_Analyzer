@@ -56,10 +56,12 @@ import_pattern_by_language = {
     'ruby': re.compile(r"require\s*['\"](.*?)['\"]"), # syntax: require XYZ
     'rust': re.compile(r"^use\s+([\w:]+)(::\{\w+(,\s*\w+)*\})?;$"),
     #'rust':re.compile(r"(?:extern crate\s+(\w+)|use\s+(!std::)(\w+))"), #extern crate XYZ OR use XYZ
-    'r':re.compile(r"library\s*\(\s*['\"](.*?)['\"]\s*\)"), #library(XYZ)
+    
+    #library(XYZ) or library("XYZ") or require(XYZ) or require("XYZ")
+    'r':re.compile(r"library\s*\(\s*['\"]?(.*?)['\"]?\s*\)|require\s*\(\s*['\"]?(.*?)['\"]?\s*\)"), 
     'julia':re.compile(r"(?:using|import)\s+([A-Za-z0-9_]+(?:\s*,\s*[A-Za-z0-9_]+)*)"), #various, but using XYZ or import XYZ
     'c':re.compile(r'#include\s*(?:[<"])([^>"]+)[>"]'), #various but include <XYZ> or include "XYZ",
-    'javascript':re.compile(r"require\(['\"](.*?)['\"]\)|import(?:.*?from\s+)?['\"](.*?)['\"];?"),#require('X') and import y from 'Y'
+    'javascript':re.compile(r"require\(['\"](.*?)['\"]\)|import(?:.*?from\s+)?['\"](.*?)['\"];?|import\s*['\"](.*?)['\"];?"), #require('X') and import y from 'Y' and import 'Y'
     'java':re.compile(r'import\s+(?:static\s+)?([a-zA-Z0-9_]+)\..*?;'), #import X.Y -> get X, import static Z -> get Z
     'perl':re.compile(r'use\s+([a-zA-Z0-9_]+)(?:::[a-zA-Z0-9_]+)*;'),
     'php': re.compile(r'use\s+([a-zA-Z0-9_]+)\\?'),
