@@ -64,7 +64,7 @@ import_pattern_by_language = {
     'javascript':re.compile(r"require\(['\"](.*?)['\"]\)|import(?:.*?from\s+)?['\"](.*?)['\"];?|import\s*['\"](.*?)['\"];?"), #require('X') and import y from 'Y' and import 'Y'
     'java':re.compile(r'import\s+(?:static\s+)?([a-zA-Z0-9_]+)\..*?;'), #import X.Y -> get X, import static Z -> get Z
     'perl':re.compile(r'use\s+([a-zA-Z0-9_]+)(?:::[a-zA-Z0-9_]+)*;'),
-    'php': re.compile(r'use\s+([a-zA-Z0-9_]+)\\?'),
+    'php': re.compile(r'(?:\b(?:require|require_once|include|include_once)\s*\(?\s*[\'"])([^\'"]+)(?:[\'"]\s*\)?)'),
     'matlab':re.compile(r'import\s+([a-zA-Z0-9_]+)\.?'),
     'objective-c':re.compile(r'#import\s+<([a-zA-Z0-9_]+)\/'),
     'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)')

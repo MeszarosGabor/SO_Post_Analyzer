@@ -368,6 +368,7 @@ def extract_code_snippets_from_parsed_row(parsed_row: typing.Dict) -> None:
 def extract_import_statements_from_code(code: str, target_language: str) -> typing.List[str]:
     language_specific_extractor = {
         "python": extract_python_import_statements_from_code,
+        "php": extract_php_import_statements_from_code,
         "ruby": extract_ruby_import_statements_from_code,
         "rust": extract_rust_import_statements_from_code,
         "javascript": extract_javascript_import_statements_from_code,
@@ -404,6 +405,13 @@ def extract_python_import_statements_from_code(code: str) -> typing.List[str]:
 def extract_ruby_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
     for statement in regex_patterns.import_pattern_by_language['ruby'].findall(code):
+        import_statements.add(statement.split("/")[0].strip())
+
+    return import_statements
+
+def extract_php_import_statements_from_code(code: str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['php'].findall(code):
         import_statements.add(statement.split("/")[0].strip())
 
     return import_statements
