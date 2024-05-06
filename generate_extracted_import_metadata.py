@@ -72,6 +72,7 @@ def generate_extracted_import_metadata(
 
                 payload = {
                     "id": post_id,
+		    "post_type":data.get("post_type"),
                     "imports": import_list,
                     # "codes": codes,  # NOTE: this can be huge, think twice before adding it back!
                     "date": data.get("date_posted"),  # 
