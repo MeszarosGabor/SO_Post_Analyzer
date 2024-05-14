@@ -87,10 +87,11 @@ def generate_extracted_import_metadata(
                         "%Y-%m-%dT%H:%M:%S.%f").date()
                 daily_post_stats[dt.strftime("%Y-%m-%d")] += 1
 
-                stats['non-empty list'] += 1
+                stats['success'] += 1
             except Exception as exc:
                 stats[str(exc)] += 1
-            
+    stats['non-empty list'] = stats['success'] - stats['empty list']
+    stats.pop('success')
 
     return valid_libs_stats, invalid_libs_stats, daily_post_stats, stats
 
