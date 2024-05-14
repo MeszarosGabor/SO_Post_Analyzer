@@ -1,6 +1,10 @@
 # Skip data and results folders
 data/*
 results/*
+follow_up_projects/patent_data/data/*
+follow_up_projects/patent_data/results/*
+follow_up_projects/chess/data/*
+follow_up_projects/book_titles/data/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
