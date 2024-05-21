@@ -1,9 +1,12 @@
+import sys
+sys.path.append("/home/debian/gabe/SO_Post_Analyzer")
+
 import json
 import time
 
 import click
 
-import polyas_urn_model
+import follow_up_projects.urn_model.polyas_urn_model as polyas_urn_model
 
 
 @click.command()
@@ -11,19 +14,21 @@ import polyas_urn_model
 @click.option("--bps", type=int)
 @click.option("--nei", type=int)
 @click.option("--noi", type=int)
-def main(rounds, bps, nei, noi):
+@click.option("--batch", type=int)
+def main(rounds, bps, nei, noi, batch):
     print("Loading count...")
-    with open("patent_code_counts.json") as handle:
+    with open("results/patent_code_counts.json") as handle:
         code_counts = json.load(handle)
     print("Done")
 
     print("Starting simulation...")
-    patent_sim = polyas_urn_model.urn_simulation_with_redis(
+    patent_sim = polyas_urn_model.urn_simulation_with_sqlite(
         rounds,
         base_pool_size=bps,
         new_element_increment=nei,
         new_opportunity_increment=noi,
         card_sizes=code_counts,
+        batch=batch,
     )
     print("Done")
     print("Saving result to JSON...")
