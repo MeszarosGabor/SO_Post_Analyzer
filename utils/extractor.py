@@ -375,6 +375,7 @@ def extract_import_statements_from_code(code: str, target_language: str) -> typi
         "java": extract_java_import_statements_from_code,
         "c": extract_c_import_statements_from_code,
         "r": extract_r_import_statements_from_code,
+        "cpp": extract_cpp_import_statements_from_code,
     }.get(target_language)
     if not language_specific_extractor:
         raise Exception("Language import extract is not supported, missing function!")
@@ -456,6 +457,19 @@ def extract_c_import_statements_from_code(code:str) ->typing.List[str]:
         if not statement:
             continue
         import_statements.add(statement.split(".")[0].strip())
+
+    return import_statements
+
+
+def extract_cpp_import_statements_from_code(code:str) ->typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['cpp'].findall(code):
+        if not statement:
+            continue
+        if statement[0]:
+            import_statements.add(statement[0].split("/")[0].strip())
+        elif statement[1]:
+            import_statements.add(statement[1].split("/")[0].strip())
 
     return import_statements
 

@@ -67,7 +67,8 @@ import_pattern_by_language = {
     'php': re.compile(r'(?:\b(?:require|require_once|include|include_once)\s*\(?\s*[\'"])([^\'"]+)(?:[\'"]\s*\)?)'),
     'matlab':re.compile(r'import\s+([a-zA-Z0-9_]+)\.?'),
     'objective-c':re.compile(r'#import\s+<([a-zA-Z0-9_]+)\/'),
-    'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)')
+    'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)'),
+    'cpp': re.compile(r'#\s*include\s*<([^>]+)>|#\s*include\s*"([^"]+)"'),
 }
 
 
