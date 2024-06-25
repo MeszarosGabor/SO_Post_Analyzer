@@ -262,6 +262,14 @@ def urn_simulation_with_sqlite(
             pairs_have_seen.add(canonical_name)
         element_counts.append(len(element_have_seen))
         pairs_counts.append(len(pairs_have_seen))
+
+    print("Flushing DB...")
+    metadata = MetaData()
+    metadata.reflect(bind=engine)
+
+    # Drop all tables
+    metadata.drop_all(bind=engine)
+
     
     return {
         "element_counts": np.array(element_counts),

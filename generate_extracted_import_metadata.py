@@ -25,7 +25,7 @@ def generate_extracted_import_metadata(
     valid_libs_stats = []
     invalid_libs_stats = collections. defaultdict(int)
     daily_post_stats = collections.defaultdict(int)
-
+    code_count_list = []
     with (
         open(input_path) as in_handle,
     ):
@@ -69,7 +69,7 @@ def generate_extracted_import_metadata(
 
                 if not import_list:
                     stats['empty list'] += 1
-
+                code_count_list.append(len(import_list))
                 payload = {
                     "id": post_id,
 		    "post_type":data.get("post_type"),
@@ -93,7 +93,7 @@ def generate_extracted_import_metadata(
     stats['non-empty list'] = stats['success'] - stats['empty list']
     stats.pop('success')
 
-    return valid_libs_stats, invalid_libs_stats, daily_post_stats, stats
+    return valid_libs_stats, invalid_libs_stats, daily_post_stats, code_count_list, stats
 
 
 @click.command()
@@ -145,7 +145,7 @@ def main(
             logger.info("Parse-XML-only enabled, exiting execution.")
             return
 
-    valid_libs_stats, invalid_libs_stats, daily_post_stats, stats =\
+    valid_libs_stats, invalid_libs_stats, daily_post_stats, code_count_list, stats =\
         generate_extracted_import_metadata(
             input_path=curated_posts_path, 
             target_language=target_language,
@@ -156,6 +156,9 @@ def main(
 
     with open(f"{imports_output_path}_{target_language}_daily_post_stats.json", "w") as out_handle:
         json.dump(daily_post_stats, out_handle)
+
+    with open(f"{imports_output_path}_{target_language}_code_count_list.json", "w") as out_handle:
+        json.dump(code_count_list, out_handle)
 
     if gen_invalids:
         with open(f"{imports_output_path}_{target_language}_invalid_libs.json", 'w') as handle:

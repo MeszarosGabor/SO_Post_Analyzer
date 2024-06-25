@@ -35,7 +35,7 @@ def main(rounds, bps, nei, noi, batch):
 
     payload = {k: [int(item) for item in v] for k, v in patent_sim.items()}
     
-    with open(f"patent_sim_rounds_{rounds}_bps_{bps}_nei_{nei}_noi_{noi}.json", 'w') as handle:
+    with open(f"results/sims/patent_sim_rounds_{rounds}_bps_{bps}_nei_{nei}_noi_{noi}.json", 'w') as handle:
         json.dump(payload,  handle)
     print("Done")
 
