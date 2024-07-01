@@ -16,66 +16,10 @@ import tqdm
 from redis.exceptions import BusyLoadingError
 from tenacity import retry, wait_fixed, stop_after_attempt, retry_if_exception_type
 
-from sqlalchemy import text
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import text
 
-
-def multi_urn_simulation(
-    rounds: int,
-    base_pool_count: int,
-    base_pool_size: int,
-    new_element_increment: int,
-    new_opportunity_increment: int,
-    swap_probability: float,
-    card_sizes: list=None,
-    poisson_mean: float=None,
-):
-    if poisson_mean and card_sizes:
-        raise ValueError("Exactly one of card_size and poisson mean should be defined!")
-    if card_sizes is not None and len(card_sizes) < rounds:
-        raise ValueError("If card_sizes is provided its size needs to be as much as the number of rounds requested.")
-    
-    base_pools = [list(range(i * base_pool_size, (i+1) * base_pool_size)) for i in range(base_pool_count)]
-    max_element = base_pool_count * base_pool_size - 1
-    current_pool_index = random.choice(list(range(len(base_pools))))
-    current_pool = base_pools[current_pool_index]
-    
-    element_have_seen = set()
-    pairs_have_seen = set()
-    element_counts = []
-    pairs_counts = []
-    
-    for round_index in tqdm.tqdm(range(rounds)):
-        number_of_items_in_post = card_sizes[round_index] if card_sizes else np.random.poisson(poisson_mean)
-        elements_in_post = []
-        for _ in range(number_of_items_in_post):
-            # decide if we stay in the current urn or switch to another one
-            if random.random() < swap_probability:
-                current_pool_index = random.choice([i for i in range(len(base_pools)) if i != current_pool_index])
-                current_pool = base_pools[current_pool_index]
-
-            new_element = random.choice(current_pool)
-            # reinforcement
-            current_pool.extend([new_element for _ in range(new_element_increment)])
-            if new_element not in element_have_seen:
-                current_pool.extend([max_element + i for i in range(1, new_opportunity_increment + 1)])
-                max_element += new_opportunity_increment
-            element_have_seen.add(new_element)
-            elements_in_post.append(new_element)
-        for element_a, element_b in itertools.combinations(elements_in_post, 2):
-            canonical_name = "|".join(sorted([str(element_a), str(element_b)]))
-            pairs_have_seen.add(canonical_name)
-        element_counts.append(len(element_have_seen))
-        pairs_counts.append(len(pairs_have_seen))
-
-    return {
-        "element_counts": np.array(element_counts),
-        "pairs_counts": np.array(pairs_counts),
-    }
-
-
-
-
+@profile
 def multi_urn_simulation_with_sqlite(
     rounds: int,
     base_pool_count: int,
@@ -90,12 +34,12 @@ def multi_urn_simulation_with_sqlite(
 ):
     Base = declarative_base()
     def create_urnsim_table_class(index):
-        class UrnSim(Base):
+        class UrnSimReusable(Base):
             __tablename__ = f'urnsim{index}'
             key = Column(Integer, primary_key=True)
             ball = Column(Integer)
         
-        return UrnSim
+        return UrnSimReusable
     
     if poisson_mean and card_sizes:
         raise ValueError("Exactly one of card_size and poisson mean should be defined!")
@@ -160,6 +104,7 @@ def multi_urn_simulation_with_sqlite(
 
             new_element_index = random.randint(1, pool_sizes[current_urn_index])
             #new_element = session.query(current_urnsim_class).filter_by(key=new_element_index).first().ball
+            
             table_name = f"urnsim{current_urn_index}"
             sql_statement = text(f"SELECT ball FROM {table_name} WHERE key = :key")
             new_element = session.execute(
@@ -202,3 +147,22 @@ def multi_urn_simulation_with_sqlite(
         "element_counts": np.array(element_counts),
         "pairs_counts": np.array(pairs_counts),
     }
+
+import random
+def main():
+
+    card_sizes = [random.randint(1,10) for _ in range(1000)]
+    total = multi_urn_simulation_with_sqlite(
+    rounds=1000,
+    base_pool_count=10,
+    base_pool_size=100,
+    new_element_increment=50,
+    new_opportunity_increment=800,
+    swap_probability=0.2,
+    card_sizes=card_sizes,
+    batch=100)
+    print("Total:", total)
+
+
+if __name__ == "__main__":
+    main()

@@ -254,7 +254,7 @@ def urn_simulation_with_sqlite(
                     session.add(new_e)
                 pool_size += new_opportunity_increment
                 session.commit()
-                    
+
             element_have_seen.add(new_element)
             elements_in_post.append(new_element)
         for element_a, element_b in itertools.combinations(elements_in_post, 2):
