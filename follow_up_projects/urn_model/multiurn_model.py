@@ -26,9 +26,10 @@ def multi_urn_simulation(
     base_pool_size: int,
     new_element_increment: int,
     new_opportunity_increment: int,
-    swap_probability: float,
+    swap_propability: float,
     card_sizes: list=None,
     poisson_mean: float=None,
+    return_urns: bool=False,
 ):
     if poisson_mean and card_sizes:
         raise ValueError("Exactly one of card_size and poisson mean should be defined!")
@@ -37,7 +38,7 @@ def multi_urn_simulation(
     
     base_pools = [list(range(i * base_pool_size, (i+1) * base_pool_size)) for i in range(base_pool_count)]
     max_element = base_pool_count * base_pool_size - 1
-    current_pool_index = random.choice(list(range(len(base_pools))))
+    current_pool_index = 0#random.choice(list(range(len(base_pools))))
     current_pool = base_pools[current_pool_index]
     
     element_have_seen = set()
@@ -50,16 +51,18 @@ def multi_urn_simulation(
         elements_in_post = []
         for _ in range(number_of_items_in_post):
             # decide if we stay in the current urn or switch to another one
-            if random.random() < swap_probability:
+            if random.random() < swap_propability:
                 current_pool_index = random.choice([i for i in range(len(base_pools)) if i != current_pool_index])
                 current_pool = base_pools[current_pool_index]
 
             new_element = random.choice(current_pool)
             # reinforcement
             current_pool.extend([new_element for _ in range(new_element_increment)])
+            # expansion via adjacent possible
             if new_element not in element_have_seen:
                 current_pool.extend([max_element + i for i in range(1, new_opportunity_increment + 1)])
                 max_element += new_opportunity_increment
+
             element_have_seen.add(new_element)
             elements_in_post.append(new_element)
         for element_a, element_b in itertools.combinations(elements_in_post, 2):
@@ -68,12 +71,14 @@ def multi_urn_simulation(
         element_counts.append(len(element_have_seen))
         pairs_counts.append(len(pairs_have_seen))
 
-    return {
+    payload = {
         "element_counts": np.array(element_counts),
         "pairs_counts": np.array(pairs_counts),
     }
+    if return_urns:
+        payload["urns"] = base_pools
 
-
+    return payload
 
 
 def multi_urn_simulation_with_sqlite(

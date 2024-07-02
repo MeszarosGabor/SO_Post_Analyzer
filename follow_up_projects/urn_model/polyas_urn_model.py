@@ -37,6 +37,7 @@ def urn_simulation(
     new_opportunity_increment: int,
     card_sizes: list=None,
     poisson_mean: float=None,
+    return_urns: bool=False,
 ):
     if poisson_mean and card_sizes:
         raise ValueError("Exactly one of card_size and poisson mean should be defined!")
@@ -47,15 +48,21 @@ def urn_simulation(
     pairs_have_seen = set()
     element_counts = []
     pairs_counts = []
+    max_element = base_pool[-1]
     
     for round_index in tqdm.tqdm(range(rounds)):
         number_of_items_in_post = card_sizes[round_index] if card_sizes else np.random.poisson(poisson_mean)
         elements_in_post = []
         for _ in range(number_of_items_in_post):
             new_element = random.choice(base_pool)
+            # reinforcement
             base_pool.extend([new_element for _ in range(new_element_increment)])
+
+            # expansion via adjacent possible
             if new_element not in element_have_seen:
-                base_pool.extend([base_pool[-1] + i for i in range(1, new_opportunity_increment + 1)])
+                base_pool.extend([max_element + i for i in range(1, new_opportunity_increment + 1)])
+                max_element  = base_pool[-1]
+
             element_have_seen.add(new_element)
             elements_in_post.append(new_element)
         for element_a, element_b in itertools.combinations(elements_in_post, 2):
@@ -64,10 +71,14 @@ def urn_simulation(
         element_counts.append(len(element_have_seen))
         pairs_counts.append(len(pairs_have_seen))
 
-    return {
+    payload = {
         "element_counts": np.array(element_counts),
         "pairs_counts": np.array(pairs_counts),
     }
+    if return_urns:
+        payload["urns"] = base_pool
+
+    return payload
 
 
 @retry(
