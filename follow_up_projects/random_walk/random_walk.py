@@ -1,8 +1,11 @@
 import itertools
+import time
+import typing
+
 import networkx as nx
 import random
 import numpy as np
-import tqdm
+from tqdm import tqdm
 
 
 def create_graph(edges):
@@ -50,7 +53,7 @@ def random_walk(G, start_node, steps, weight_update):
     current_node = start_node
     walk = [current_node]
 
-    for _ in tqdm.tqdm(range(steps)):
+    for _ in tqdm(range(steps)):
         neighbors = list(G.neighbors(current_node))
         if not neighbors:
             break
@@ -65,3 +68,54 @@ def random_walk(G, start_node, steps, weight_update):
         walk.append(current_node)
 
     return walk
+
+
+
+def convert_nx_graph_to_primitive_neighbors_dict(G: nx.Graph):
+    return {node: list(G.neighbors(node)) for node in G.nodes()}
+
+
+def random_walk_edge_reinforcement(
+    neighbors: typing.Dict[int, typing.List],
+    rounds: int,
+    start_index: typing.Union[int, None]=None,
+    initial_weights: int=1,
+    reinforcement_weight: int=0,
+    return_neighbors: bool=False,
+    with_logging: bool=True):
+    """
+    Random walk implementation using primitive structures only (no networkx; aiming for fast random selections).
+    We use random access indexes of the neighbor lists to quickly select new nodes.
+    We also reinforce edges by listing the neighbors multiple times (hence reinforcement weight must be an integer).
+    """
+    t0 = time.time()
+    print("Setup...")
+    act_node = start_index if start_index is not None else random.choice(neighbors)
+    walk = [act_node]
+
+    if initial_weights > 1:
+        for node, neighbor_list in neighbors.items():
+            neighbors[node] = neighbor_list * initial_weights
+    t1 = time.time()
+    if with_logging:
+        print(f"...Done. Took {round((t1 - t0), 1)} seconds. Starting Rounds...")
+
+    t0 = time.time()
+    for round_index in range(1, rounds + 1):
+        if with_logging and round_index % 100 == 0:
+            print(f"Doing round #{round_index}")
+        old_node, act_node = act_node, random.choice(neighbors[act_node])
+        walk.append(act_node)
+
+        # reinforcement
+        neighbors[old_node].extend([act_node for _ in range(reinforcement_weight)])
+        neighbors[act_node].extend([old_node for _ in range(reinforcement_weight)])
+    t1 = time.time()
+    if with_logging:
+        print(f"...Done. Took {round((t1 - t0), 1)} seconds.")
+    if return_neighbors:
+        return {
+            "walk": walk,
+            "neighbors": neighbors,
+        }
+    return {"walk": walk}
