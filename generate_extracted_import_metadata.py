@@ -69,6 +69,8 @@ def generate_extracted_import_metadata(
 
                 if not import_list:
                     stats['empty list'] += 1
+                    continue
+
                 code_count_list.append(len(import_list))
                 payload = {
                     "id": post_id,
@@ -90,8 +92,6 @@ def generate_extracted_import_metadata(
                 stats['success'] += 1
             except Exception as exc:
                 stats[str(exc)] += 1
-    stats['non-empty list'] = stats['success'] - stats['empty list']
-    stats.pop('success')
 
     return valid_libs_stats, invalid_libs_stats, daily_post_stats, code_count_list, stats
 

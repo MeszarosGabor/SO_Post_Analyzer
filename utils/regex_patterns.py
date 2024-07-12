@@ -54,7 +54,8 @@ job_name_regex = re.compile(r"[^-a-z0-9]+")
 import_pattern_by_language = {
     'python': re.compile(r"(?m)^\s*(from[^\n]+|import[^\n]+)"), #syntax: various but import XYZ
     'ruby': re.compile(r"require\s*['\"](.*?)['\"]"), # syntax: require XYZ
-    'rust': re.compile(r"^use\s+([\w:]+)(::\{\w+(,\s*\w+)*\})?;$"),
+    'rust': re.compile(r"use\s+([\w:]+)(?:\s*::\s*\{([^}]+)\})?;?"),
+    #'rust': re.compile(r"^use\s+([\w:]+)(::\{\w+(,\s*\w+)*\})?;$"),
     #'rust':re.compile(r"(?:extern crate\s+(\w+)|use\s+(!std::)(\w+))"), #extern crate XYZ OR use XYZ
     
     #library(XYZ) or library("XYZ") or require(XYZ) or require("XYZ")
@@ -63,11 +64,14 @@ import_pattern_by_language = {
     'c':re.compile(r'#include\s*(?:[<"])([^>"]+)[>"]'), #various but include <XYZ> or include "XYZ",
     'javascript':re.compile(r"require\(['\"](.*?)['\"]\)|import(?:.*?from\s+)?['\"](.*?)['\"];?|import\s*['\"](.*?)['\"];?"), #require('X') and import y from 'Y' and import 'Y'
     'java':re.compile(r'import\s+(?:static\s+)?([a-zA-Z0-9_]+)\..*?;'), #import X.Y -> get X, import static Z -> get Z
-    'perl':re.compile(r'use\s+([a-zA-Z0-9_]+)(?:::[a-zA-Z0-9_]+)*;'),
+    'perl':re.compile(r'use\s+([a-zA-Z0-9_]+)(?:::[a-zA-Z0-9_]+)*[; ]'),
     'php': re.compile(r'(?:\b(?:require|require_once|include|include_once)\s*\(?\s*[\'"])([^\'"]+)(?:[\'"]\s*\)?)'),
-    'matlab':re.compile(r'import\s+([a-zA-Z0-9_]+)\.?'),
-    'objective-c':re.compile(r'#import\s+<([a-zA-Z0-9_]+)\/'),
-    'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)'),
+    'matlab':re.compile(r'import\s+[\w\.]+\.\*'),
+    #'matlab':re.compile(r'import\s+([a-zA-Z0-9_]+)\.?'),
+    'objectivec':re.compile(r'import\s+(["<][\w/]+\.h[">])'),
+    #'objectivec':re.compile(r'#import\s+<([a-zA-Z0-9_]+)\/'),
+    'swift':re.compile(r'import\s+([\w.]+)'),
+    #'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)'),
     'cpp': re.compile(r'#\s*include\s*<([^>]+)>|#\s*include\s*"([^"]+)"'),
 }
 

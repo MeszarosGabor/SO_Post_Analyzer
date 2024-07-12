@@ -376,6 +376,10 @@ def extract_import_statements_from_code(code: str, target_language: str) -> typi
         "c": extract_c_import_statements_from_code,
         "r": extract_r_import_statements_from_code,
         "cpp": extract_cpp_import_statements_from_code,
+        "perl": extract_perl_import_statements_from_code,
+        "swift": extract_swift_import_statements_from_code,
+        "matlab": extract_matlab_import_statements_from_code,
+        "objectivec": extract_objectivec_import_statements_from_code,
     }.get(target_language)
     if not language_specific_extractor:
         raise Exception("Language import extract is not supported, missing function!")
@@ -403,12 +407,21 @@ def extract_python_import_statements_from_code(code: str) -> typing.List[str]:
     return import_statements
 
 
+def extract_perl_import_statements_from_code(code: str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['perl'].findall(code):
+        import_statements.add(statement.strip())
+
+    return import_statements
+
+
 def extract_ruby_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
     for statement in regex_patterns.import_pattern_by_language['ruby'].findall(code):
         import_statements.add(statement.split("/")[0].strip())
 
     return import_statements
+
 
 def extract_php_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
@@ -421,10 +434,10 @@ def extract_php_import_statements_from_code(code: str) -> typing.List[str]:
 def extract_rust_import_statements_from_code(code: str) -> typing.List[str]:
     import_statements = set()
     for statement in regex_patterns.import_pattern_by_language['rust'].findall(code):
-        target = statement[0].split(":")[0]
+        target = statement[0].strip()
         if not target:
             continue
-        import_statements.add(target.strip())
+        import_statements.add(target)
 
     return import_statements
 
@@ -478,6 +491,39 @@ def extract_r_import_statements_from_code(code:str) ->typing.List[str]:
     import_statements = set()
     for statement in regex_patterns.import_pattern_by_language['r'].findall(code):
         target = statement[0].strip() if statement[0].strip() else statement[1].strip()
+        if not target:
+            continue
+        import_statements.add(target)
+
+    return import_statements
+
+
+def extract_swift_import_statements_from_code(code:str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['swift'].findall(code):
+        target = statement.split(".")[0]
+        if not target:
+            continue
+        import_statements.add(target)
+
+    return import_statements
+
+
+def extract_matlab_import_statements_from_code(code:str) -> typing.List[str]:
+    import_statements  = set()
+    for statement in regex_patterns.import_pattern_by_language['matlab'].findall(code):
+        target = statement.split(".")[0].strip()
+        if not target:
+            continue
+        import_statements.add(target)
+
+    return import_statements
+
+
+def extract_objectivec_import_statements_from_code(code:str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['objectivec'].findall(code):
+        target = statement.replace("<","").split("/")[0].strip()
         if not target:
             continue
         import_statements.add(target)
