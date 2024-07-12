@@ -26,10 +26,11 @@ def multi_urn_simulation(
     base_pool_size: int,
     new_element_increment: int,
     new_opportunity_increment: int,
-    swap_propability: float,
+    swap_probability: float,
     card_sizes: list=None,
     poisson_mean: float=None,
     return_urns: bool=False,
+    with_tqdm: bool=True,
 ):
     if poisson_mean and card_sizes:
         raise ValueError("Exactly one of card_size and poisson mean should be defined!")
@@ -46,12 +47,12 @@ def multi_urn_simulation(
     element_counts = []
     pairs_counts = []
     
-    for round_index in tqdm.tqdm(range(rounds)):
+    for round_index in (tqdm.tqdm(range(rounds)) if with_tqdm else range(rounds)):
         number_of_items_in_post = card_sizes[round_index] if card_sizes else np.random.poisson(poisson_mean)
         elements_in_post = []
         for _ in range(number_of_items_in_post):
             # decide if we stay in the current urn or switch to another one
-            if random.random() < swap_propability:
+            if random.random() < swap_probability:
                 current_pool_index = random.choice([i for i in range(len(base_pools)) if i != current_pool_index])
                 current_pool = base_pools[current_pool_index]
 
