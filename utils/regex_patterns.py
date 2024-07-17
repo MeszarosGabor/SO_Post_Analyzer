@@ -73,6 +73,7 @@ import_pattern_by_language = {
     'swift':re.compile(r'import\s+([\w.]+)'),
     #'swift':re.compile(r'import\s+([a-zA-Z0-9_]+)'),
     'cpp': re.compile(r'#\s*include\s*<([^>]+)>|#\s*include\s*"([^"]+)"'),
+    'c#': re.compile(r'^using\s+([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)\s*;\s*$', re.MULTILINE),
 }
 
 

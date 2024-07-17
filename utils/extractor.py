@@ -380,6 +380,7 @@ def extract_import_statements_from_code(code: str, target_language: str) -> typi
         "swift": extract_swift_import_statements_from_code,
         "matlab": extract_matlab_import_statements_from_code,
         "objectivec": extract_objectivec_import_statements_from_code,
+        "c#": extract_c_sharp_import_statements_from_code,
     }.get(target_language)
     if not language_specific_extractor:
         raise Exception("Language import extract is not supported, missing function!")
@@ -528,6 +529,18 @@ def extract_objectivec_import_statements_from_code(code:str) -> typing.List[str]
             continue
         import_statements.add(target)
 
+    return import_statements
+
+def extract_c_sharp_import_statements_from_code(code:str) -> typing.List[str]:
+    import_statements = set()
+    for statement in regex_patterns.import_pattern_by_language['c#'].findall(code):
+        if not statement:
+            continue
+        target = statement[0].split(".")[0].strip()
+        if not target:
+            continue
+        import_statements.add(target)
+    
     return import_statements
 
 

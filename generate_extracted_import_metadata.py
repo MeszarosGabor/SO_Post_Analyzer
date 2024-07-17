@@ -20,6 +20,7 @@ def generate_extracted_import_metadata(
         input_path: str,
         target_language: str,
         bypass_validation: bool,
+        max_year: int,
 ) -> typing.Dict[str, int]:
     stats = collections.defaultdict(int)
     valid_libs_stats = []
@@ -58,6 +59,14 @@ def generate_extracted_import_metadata(
                     stats["no code"] += 1
                     continue
 
+                if not data.get("date_posted"):
+                    stats["no date"] += 1
+                    continue
+
+                if int(data["date_posted"][:4]) > int(max_year):
+                    stats["too new"] += 1
+                    continue
+
                 # process invalid libs stats
                 for invalid in invalids:
                     invalid_libs_stats[invalid] += 1
@@ -65,7 +74,6 @@ def generate_extracted_import_metadata(
                 # TODO: this should not happen here.
                 # only keep reasonably looking imports. Ditch empty strings, etc.
                 import_list = [item.strip() for item in import_list if item.strip()]
-
 
                 if not import_list:
                     stats['empty list'] += 1
@@ -107,6 +115,8 @@ def generate_extracted_import_metadata(
               help="Should we validate the packages obtained?")
 @click.option("--gen_invalids", is_flag=True, show_default=True, default=False,
               help="Generates a JSON collection of encountered invalid libs.")
+@click.option("--max_year", type=int, default=2024, show_default=True,
+              help="Only process entries that are not younger than the end of the given year.")
 def main(
     target_language,
     raw_input_path,
@@ -116,6 +126,7 @@ def main(
     imports_output_path,
     bypass_validation,
     gen_invalids,
+    max_year,
 ):
     if (
         not raw_input_path
@@ -149,7 +160,8 @@ def main(
         generate_extracted_import_metadata(
             input_path=curated_posts_path, 
             target_language=target_language,
-            bypass_validation=bypass_validation)
+            bypass_validation=bypass_validation,
+            max_year=max_year)
 
     with open(f"{imports_output_path}_{target_language}_post_stats.json", "w") as out_handle:
         json.dump(valid_libs_stats, out_handle)
