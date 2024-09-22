@@ -11,12 +11,23 @@ logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
-def collect_post_count_to_new_libs_data(data: typing.List[typing.Dict]):
+def collect_post_count_to_new_libs_data(language: str, count_lower_limit: int = 0):
     stats = collections.defaultdict(int)
     time_buckets = collections.defaultdict(list)
+
+
+    with open(f"data/results/{language}/{language}_{language}_post_stats.json") as in_handle:
+        data = json.load(in_handle)
+
+    with open(f"data/results/{language}/{language}_libs_count.json") as handle:
+        counts = json.load(handle)
+    
     for row in tqdm.tqdm(data):
         try:
-            time_buckets[row.get("date")] = set(row.get("imports"))
+            imports = {lib_ for lib_ in row.get("imports", []) if counts.get(lib_, 0) > count_lower_limit}
+            if not imports:
+                continue
+            time_buckets[row.get("date")] = imports
             stats["success"] += 1
         except Exception as exc:
             stats[str(exc)] += 1
@@ -25,7 +36,7 @@ def collect_post_count_to_new_libs_data(data: typing.List[typing.Dict]):
     distinct_libs, distinct_pairs = set(), set()
     distinct_libs_plot, distinct_pairs_plot = [], []
 
-    for date_time, libs in sorted_buckets:
+    for date_time, libs in sorted_buckets:        
         distinct_libs |= libs
         distinct_pairs |= set(itertools.combinations(libs, 2))
         distinct_libs_plot.append(
@@ -39,24 +50,3 @@ def collect_post_count_to_new_libs_data(data: typing.List[typing.Dict]):
             'distinct_libs_plot': distinct_libs_plot,
             'distinct_pairs_plot': distinct_pairs_plot,
     }, stats
-
-
-@click.command()
-@click.option("-i", "--input_path", type=str)
-@click.option("-o", "--output_path", type=str)
-def main(input_path, output_path):
-    logger.info("Load input JSON (this takes a while...)")
-    with open(input_path) as in_handle:
-        input_data = json.load(in_handle)
-    logger.info("Input JSON loaded.")
-
-    data, stats = collect_post_count_to_new_libs_data(input_data)
-    
-    logger.info(stats)
-    logger.info("Generating output file...")
-    with open(f"{output_path}_post_to_libs.json", 'w') as out_handle:
-        json.dump(data, out_handle)
-
-
-if __name__ == "__main__":
-    main()

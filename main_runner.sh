@@ -6,6 +6,4 @@ for language in "${languages[@]}"; do
   sleep 1
   python3 generate_indiv_and_pair_lib_stats.py -i data/results/${language}/${language}_${language}_post_stats.json -o data/results/${language}/${language}
   sleep 1
-  python3 generate_post_to_new_libs.py -i data/results/${language}/${language}_${language}_post_stats.json -o data/results/${language}/${language}
-  sleep 1
 done
