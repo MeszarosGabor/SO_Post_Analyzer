@@ -95,3 +95,23 @@ is populated for a handful of exceptions such as `rest_framework`.
 
 Notable (non-negligible hit count) ignored libraries include:
 - `mpl_toolkits` (most likely a deprecated `matplotlib` internal)
+
+
+
+
+# RESOURCES
+https://www.dropbox.com/scl/fi/ffuypmoc1n9fl3rwrbtde/python.json?rlkey=9jnqwxx7oieg2gy38lmf73oiz&dl=0
+https://www.dropbox.com/scl/fi/kdlg45mxuz5pezzjvva3f/javascript.json?rlkey=jhdnc8rts2scl0un42tnvxc1l&dl=0
+https://www.dropbox.com/scl/fi/qdfcmssoopzvvjqzz5k3x/java.json?rlkey=9y1dc6nn7lkgthcfjz3i0nfsn&dl=0
+https://www.dropbox.com/scl/fi/bfrtnb1q29eiu8890ou12/cpp.json?rlkey=fh095ybzmslo7ojbrm483pxib&dl=0
+https://www.dropbox.com/scl/fi/wtn2kodjpg31tcgnxx3xo/r.json?rlkey=tehxkf9rp4m7qmrcicec290yi&dl=0
+https://www.dropbox.com/scl/fi/51lo3sbtrhb0afncsnoad/objectivec.json?rlkey=38wjpdu9wtkalg403o7egkhda&dl=0
+https://www.dropbox.com/scl/fi/f4ln045mt7sltf8bk1ath/ruby.json?rlkey=53sqob8x0i82c56havzqj3a1d&dl=0
+https://www.dropbox.com/scl/fi/xj8ogxeuo6a8yulzqvc52/perl.json?rlkey=zasescvcsex9bzs58geibcgry&dl=0
+https://www.dropbox.com/scl/fi/a01b14qylgrdu5om3yhhk/php.json?rlkey=ikawkhdlr1glfygy93goi6elw&dl=0
+https://www.dropbox.com/scl/fi/ix6pq1op799p9pczuz2s5/swift.json?rlkey=pvh37ro391ll9zw448p1yboim&dl=0
+https://www.dropbox.com/scl/fi/10h6f0wr9dg9qf1xryk16/rust.json?rlkey=p8hgxnvgms75bbul724s2nqzr&dl=0
+https://www.dropbox.com/scl/fi/gfr2hftjha6b34ehcdc8y/c.json?rlkey=ktkw27cfcjrpgmngao3d1x8ic&dl=0
+
+
+
