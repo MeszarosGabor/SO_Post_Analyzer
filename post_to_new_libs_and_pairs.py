@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
-def collect_post_count_to_new_libs_data(language: str, count_lower_limit: int = 0):
+def collect_post_count_to_new_libs_and_pairs(language: str, count_lower_limit: int = 0):
     stats = collections.defaultdict(int)
     time_buckets = collections.defaultdict(list)
 

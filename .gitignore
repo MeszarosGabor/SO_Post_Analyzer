@@ -5,6 +5,7 @@ follow_up_projects/patent_data/data/*
 follow_up_projects/patent_data/results/*
 follow_up_projects/chess/data/*
 follow_up_projects/book_titles/data/*
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
